@@ -17,7 +17,8 @@ from io import StringIO
 #				 and output() function
 # updates by Fredrik Wendt
 #   - 2011-10-16: merged with example from polymetr at GitHub
-#
+#updates by Keyur Patel
+#	- 2013-01-23: Added list condition to parse the dictionary inside list array.
 
 class dict2rss:
 	def __init__(self, dict):
@@ -40,7 +41,7 @@ class dict2rss:
 
 				sys.stdout = self.itemio
 				for child in dict[key]:
-					print(u'\t\t<item>')
+					print(u'\t\t<item>\n')
 					for childchild in dict[key][child]:
 						if childchild == "comment":
 							print(u"\t\t\t<!-- %s -->" % (dict[key][child][childchild]))
@@ -51,8 +52,38 @@ class dict2rss:
 								else: 
 									print(u'\t\t\t<%s>%s</%s>'  % (childchild, cgi.escape(dict[key][child][childchild]), childchild))
 							except: print(u'\t\t\t<%s>%s</%s>'  % (childchild, cgi.escape(dict[key][child][childchild]), childchild))
-					print(u'\t\t</item>')
+					print(u'\t\t</item>\n')
 				sys.stdout = sys.__stdout__
+			elif 'list' in str(type(element)) and key == 'item':
+				"""Parse list Array containing dictionary's for key items"""
+				'''
+				Sample Json
+				{
+ 				   "title": "My feed",
+    				"link": "www.google.com",
+    				"item": [
+        					{
+            					"title": "Hello&World",
+            					"content": "This is a sample Content",
+            					"comment": "This is a comment",
+            					"pubDate": "18 GMT 1202389 2010"
+        					},
+        					{
+            					"title": "Second Item",
+            					"content": "I love dict2rss.py"
+        					}
+    						],
+    				"description": "some shit!!!"
+				}
+				'''
+				sys.stdout = self.itemio
+				for items in element:					
+					print(u'\t\t<item>')
+					if 'dict' in str(type(items)):
+						for child in items:
+							print(u'\t\t\t<%s>%s</%s>'  % (child, cgi.escape(items[child]), child))
+					print(u'\t\t</item>')
+				sys.stdout = sys.__stdout__		
 
 	def PrettyPrint(self):
 		print(self._out())
